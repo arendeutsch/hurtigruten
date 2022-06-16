@@ -1,24 +1,53 @@
-import React from 'react';
-import logo from './logo.svg';
+import React, { useState, useEffect, useCallback } from 'react';
+import BikeMap from './components/BikeMap/BikeMap';
+
+import { Availability, Station, StationData } from './models';
 import './App.css';
 
+
 function App() {
+  const [data, setData] = useState<StationData[]>([]);
+
+  const fetchData = useCallback(async () => {
+    const stationData: StationData[] = [];
+    const fetchStations = fetch('https://gbfs.urbansharing.com/oslobysykkel.no/station_information.json').then(res => res.json());
+    const fetchAvailability = fetch('https://gbfs.urbansharing.com/oslobysykkel.no/station_status.json').then(res => res.json());
+
+    const apiData = Promise.all([fetchStations, fetchAvailability]);
+    await apiData.then(response => {
+        const stations: Station[] = response[0].data.stations;
+        const availability: Availability[] = response[1].data.stations;
+
+        stations.forEach((station: Station, index: number) => {
+            stationData.push({
+                address: station.address,
+                capacity: station.capacity,
+                lat: station.lat,
+                lon: station.lon,
+                name: station.name,
+                num_bikes_available: availability[index].num_bikes_available,
+                num_docks_available: availability[index].num_docks_available,
+            });
+        });
+    });
+    setData(stationData);
+  }, []);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
+    <div className='App'>
+      <header className='App-header'>
+        <span className='title'>
+          Oslo Bikes
+        </span>
       </header>
+      <BikeMap
+        center={[59.9139, 10.7522]}
+        stations={data}
+      />
     </div>
   );
 }

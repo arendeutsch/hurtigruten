@@ -1,0 +1,20 @@
+.leaflet-container {
+    width: 100vw;
+    height: calc(100vh - 60px);
+}
+
+.popup-container {
+    display: flex;
+    flex-direction: column;
+    min-width: 150px;
+}
+
+.popup-name {
+    font-size: 1.2em;
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.popup-address {
+    font-style: italic;
+}

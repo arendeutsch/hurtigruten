@@ -78,3 +78,51 @@ self.addEventListener('message', (event) => {
 });
 
 // Any other custom service worker logic can go here.
+const cacheName = 'osloBikesCache';
+
+// Adds all url to cahce when app starts
+self.addEventListener('install', (event) => {
+  event.waitUntil(
+    caches.open(cacheName).then(cache => {
+      return cache.addAll([
+        '/',
+        '/favicon.ico',
+        '/manifest.json',
+        '/service-worker.js',
+        '/index.html',
+        '/static/js/787.bcba4d4e.chunk.js',
+        '/static/js/main.c0aee386.js',
+        '/static/css/main.d69ec47d.css',
+        'https://gbfs.urbansharing.com/oslobysykkel.no/station_information.json',
+        'https://gbfs.urbansharing.com/oslobysykkel.no/station_status.json'
+      ]);
+    })
+  )
+});
+
+// once the app is loaded this will delete the older cache and ensure the cache is recent
+self.addEventListener('activate', (event) => {
+  event.waitUntil(
+    caches.keys().then((cacheNames) => {
+      return Promise.all(
+        cacheNames.filter((cacheName) => {
+        }).map((cacheName) => {
+          return caches.delete(cacheName);
+        })
+      );
+    })
+  )
+});
+
+// when a call is made this listener will checks if the response is found in the cache and return it
+// otherwise it will make a new network call 
+self.addEventListener('fetch', (event) => {
+  event.respondWith(
+    caches.match(event.request).then((response) => {
+      if (response) {
+        return response;
+      }
+      return fetch(event.request);
+    })
+  )
+})
