@@ -7,6 +7,15 @@ import './App.css';
 
 function App() {
   const [data, setData] = useState<StationData[]>([]);
+  const [offline, setOffline] = useState(!navigator.onLine);
+
+  window.addEventListener('offline', () => {
+    setOffline(true);
+  });
+
+  window.addEventListener('online', () => {
+    setOffline(false);
+  });
 
   const fetchData = useCallback(async () => {
     const stationData: StationData[] = [];
@@ -43,6 +52,7 @@ function App() {
         <span className='title'>
           Oslo Bikes
         </span>
+        {offline ? <i className='material-icons offline-icon'>signal_wifi_off</i> : null}
       </header>
       <BikeMap
         center={[59.9139, 10.7522]}
